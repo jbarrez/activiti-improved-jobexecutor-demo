@@ -1,4 +1,4 @@
-package org.activiti.beans;
+package org.activiti;
 
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;

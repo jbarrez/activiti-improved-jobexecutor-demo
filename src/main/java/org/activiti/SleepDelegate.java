@@ -1,4 +1,4 @@
-package org.activiti.beans;
+package org.activiti;
 
 
 import org.activiti.engine.delegate.DelegateExecution;
