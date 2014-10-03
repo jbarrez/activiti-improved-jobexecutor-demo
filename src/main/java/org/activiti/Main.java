@@ -49,6 +49,9 @@ public class Main {
 		processEngine.getRepositoryService().createDeployment().name("job")
 		    .addClasspathResource("job.bpmn20.xml").deploy();
 
+		System.out.println("Process engine created. Press any key to start");
+		new Scanner(System.in).nextLine();
+		
 		ExecutorService executor = Executors.newFixedThreadPool(5);
 		for (int i = 0; i < nrOfJobs; i++) {
 			Runnable worker = new StartThread();
