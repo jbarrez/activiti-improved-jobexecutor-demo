@@ -10,7 +10,7 @@
     <property name="username" value="activiti" />
     <property name="password" value="activiti" />
     <property name="initialSize" value="25" />
-    <property name="maxActive" value="500" />
+    <property name="maxActive" value="200" />
     <property name="maxIdle" value="50" />
     <property name="minIdle" value="25" />
     <property name="timeBetweenEvictionRunsMillis" value="34000" />
