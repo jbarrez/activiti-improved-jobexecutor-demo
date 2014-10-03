@@ -39,7 +39,7 @@ public class Main {
 		
 	}
 	
-	private static void createJobs(int nrOfJobs) {
+	private static void createJobs(int nrOfJobs) throws Exception{
 		
 		// Job creator needs to be started first, as it will clean the database!
 		
@@ -49,12 +49,22 @@ public class Main {
 		processEngine.getRepositoryService().createDeployment().name("job")
 		    .addClasspathResource("job.bpmn20.xml").deploy();
 
-		ExecutorService executor = Executors.newFixedThreadPool(10);
+		ExecutorService executor = Executors.newFixedThreadPool(5);
 		for (int i = 0; i < nrOfJobs; i++) {
 			Runnable worker = new StartThread();
 			executor.execute(worker);
 		}
 		executor.shutdown();
+		logger.info("All work handed off to threadpool");
+		
+		boolean finishedAllInstances = false;
+		long finishedCount = 0;
+		while (finishedAllInstances == false) {
+			finishedCount = processEngine.getHistoryService()
+			    .createHistoricProcessInstanceQuery().unfinished().count();
+			logger.error(finishedCount + " unfinished jobs");
+			Thread.sleep(5000L);
+		}
 	}
 	
 	private static void executeJobs(int nrOfJobs) throws Exception {
