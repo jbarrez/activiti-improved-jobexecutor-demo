@@ -1,11 +1,15 @@
 package org.activiti;
 
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.activiti.engine.delegate.DelegateExecution;
 import org.activiti.engine.delegate.Expression;
 import org.activiti.engine.delegate.JavaDelegate;
 
 public class SleepDelegate implements JavaDelegate {
+	
+	public static AtomicInteger nrOfExecutions = new AtomicInteger(0);
 
   protected Expression sleepTime;
 
@@ -16,6 +20,7 @@ public class SleepDelegate implements JavaDelegate {
   		var += startTime; // Doing something to keep the JVM busy
   		Thread.sleep(10L); // Doing some sleeps to mimic I/O
   	}
+  	nrOfExecutions.incrementAndGet();
   }
 
   public void setSleepTime(Expression sleepTime) {

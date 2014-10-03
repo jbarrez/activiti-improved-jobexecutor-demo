@@ -52,7 +52,7 @@ public class Main {
 		System.out.println("Process engine created. Press any key to start");
 		new Scanner(System.in).nextLine();
 		
-		ExecutorService executor = Executors.newFixedThreadPool(5);
+		ExecutorService executor = Executors.newFixedThreadPool(1);
 		for (int i = 0; i < nrOfJobs; i++) {
 			Runnable worker = new StartThread();
 			executor.execute(worker);
@@ -99,10 +99,11 @@ public class Main {
 
 		Assert.assertEquals(0, processEngine.getManagementService().createJobQuery().count());
 		System.out.println("Jobs in system (should be 0)= "+ processEngine.getManagementService().createJobQuery().count());
-
+		System.out.println("Jobs executed by this node: " + SleepDelegate.nrOfExecutions.get());
+		
 		long time = end - start;
 		System.out.println("Took " + time + " ms");
-		double perSecond = ((double) nrOfJobs / (double) time) * 1000;
+		double perSecond = ((double) SleepDelegate.nrOfExecutions.get() / (double) time) * 1000;
 		System.out.println("Which is " + perSecond + " jobs/second");
 	}
 
