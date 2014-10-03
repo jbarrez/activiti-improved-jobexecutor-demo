@@ -6,7 +6,7 @@
 
   <bean id="dataSource" class="org.apache.tomcat.jdbc.pool.DataSource" destroy-method="close">
     <property name="driverClassName" value="com.mysql.jdbc.Driver" />
-	<property name="url" value="jdbc:mysql://192.168.0.156:3306/activiti_job?characterEncoding=UTF-8" />
+	<property name="url" value="jdbc:mysql://192.168.0.157:3306/activiti_job?characterEncoding=UTF-8" />
     <property name="username" value="activiti" />
     <property name="password" value="activiti" />
     <property name="initialSize" value="25" />

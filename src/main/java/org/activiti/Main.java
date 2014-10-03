@@ -58,6 +58,10 @@ public class Main {
 	
 	private static void executeJobs(int nrOfJobs) throws Exception {
 		
+		processEngine = ProcessEngineConfiguration
+		    .createProcessEngineConfigurationFromResource("activiti_with_jobexecutor.cfg.xml")
+		    .buildProcessEngine();
+		
 		boolean finishedAllInstances = false;
 		long lastPrintTime = 0;
 		long finishedCount = 0;
