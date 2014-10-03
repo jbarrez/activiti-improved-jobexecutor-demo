@@ -95,18 +95,8 @@ public class Main {
 
 	public static class StartThread implements Runnable {
 		
-		private static AtomicInteger count = new AtomicInteger(0);
-		private static AtomicInteger lastPrintCount = new AtomicInteger(0);
-
 		public void run() {
 			processEngine.getRuntimeService().startProcessInstanceByKey("job");
-			
-			int currentCount = count.incrementAndGet();
-			
-			if (currentCount - lastPrintCount.get() > 500) {
-				logger.info("Created " + currentCount + " jobs");
-				lastPrintCount.set(currentCount);
-			}
 		}
 
 	}
