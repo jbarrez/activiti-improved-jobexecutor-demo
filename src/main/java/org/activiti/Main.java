@@ -52,7 +52,7 @@ public class Main {
 		System.out.println("Process engine created. Press any key to start");
 		new Scanner(System.in).nextLine();
 		
-		ExecutorService executor = Executors.newFixedThreadPool(1);
+		ExecutorService executor = Executors.newFixedThreadPool(2);
 		for (int i = 0; i < nrOfJobs; i++) {
 			Runnable worker = new StartThread();
 			executor.execute(worker);
