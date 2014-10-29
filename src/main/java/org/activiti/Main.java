@@ -1,9 +1,9 @@
 package org.activiti;
 
+import java.util.Date;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.ProcessEngineConfiguration;
@@ -13,68 +13,79 @@ import org.slf4j.LoggerFactory;
 
 public class Main {
 	
-	private static final Logger logger = LoggerFactory.getLogger(Main.class);
-	
 	private static ProcessEngine processEngine;
 
 	public static void main(String[] args) throws Exception {
 		
-		if (args.length != 2) {
+		if (args.length == 0) {
 			System.err.println("Arguments needed");
-			System.err.println("First argument: { job-creator | job-executor }, to determine what this Main program will");
-			System.err.println("Second argument: { nrOfJobs }");
-			System.err.println("Example usage : java -jar theJar.jar job-creator 10000");
+			System.err.println("First argument: { job-creator | job-executor | mixed}, to determine what this Main program will be doing: creating jobs, executing them or both");
+			System.err.println("Arguments in case of job-creator: { nrOfJobs nrOfJobCreationThreads}");
+			System.err.println("Arguments in case of job-executor: { nrOfJobs }");
+			System.err.println("In case of mixed: { nrOfJobs nrOfJobCreationThreads } ");
+			System.err.println("Example usage : java -XX:MaxPermSize=512m -Xmx2G -Xms512m -jar theJar.jar job-creator 1000 4");
+			System.err.println("Example usage : java -XX:MaxPermSize=512m -Xmx2G -Xms512m -jar theJar.jar job-executor 1000");
+			System.err.println("Example usage : java -XX:MaxPermSize=512m -Xmx2G -Xms512m -jar theJar.jar mixed 1000 4");
 			System.exit(-1);
 		}
 		
 		int nrOfJobs = Integer.valueOf(args[1]);
-		if ("job-creator".equals(args[0])) {
-			createJobs(nrOfJobs);
-		} else if ("job-executor".equals(args[0])) {
-			executeJobs(nrOfJobs);
-		}
+		int nrOfThreads = args[2] != null ? Integer.valueOf(args[2]) : -1;
 		
-		System.out.println("Press any key to quit the execution before it ends");
-		new Scanner(System.in).nextLine();
+		if ("job-creator".equals(args[0])) {
+			startCreateJobs(nrOfJobs, nrOfThreads);
+		} else if ("job-executor".equals(args[0])) {
+			startExecuteJobs(nrOfJobs);
+		} else if ("mixed".equals(args[0])) {
+			startMixed(nrOfJobs, nrOfThreads);
+		} else {
+			System.err.println("Unknown argument '" + args[0] + "'");
+			System.exit(-1);
+		}
 		
 	}
 	
-	private static void createJobs(int nrOfJobs) throws Exception{
+	private static void startCreateJobs(int nrOfJobs, int nrOfThreads) throws Exception {
+		
+		System.out.println(new Date() +  " [Job Creator] Starting. Need to create " + nrOfJobs + " job with " + nrOfThreads + " threads");
 		
 		// Job creator needs to be started first, as it will clean the database!
 		
-		processEngine = ProcessEngineConfiguration
-		    .createProcessEngineConfigurationFromResource("activiti_job_creator.cfg.xml")
-		    .setDatabaseSchemaUpdate("drop-create").buildProcessEngine();
+		createJobCreatorProcessEngine(false);
 		processEngine.getRepositoryService().createDeployment().name("job")
 		    .addClasspathResource("job.bpmn20.xml").deploy();
 
-		System.out.println("Process engine created. Press any key to start");
-		new Scanner(System.in).nextLine();
-		
-		ExecutorService executor = Executors.newFixedThreadPool(6);
+		ExecutorService executor = Executors.newFixedThreadPool(nrOfThreads);
 		for (int i = 0; i < nrOfJobs; i++) {
-			Runnable worker = new StartThread();
+			Runnable worker = new StartTestProcessInstanceThread();
 			executor.execute(worker);
 		}
 		executor.shutdown();
-		logger.info("All work handed off to threadpool");
+		System.out.println(new Date() + " [Job Creator] All StartProcessInstanceThreads handed off to executor service");
 		
 		boolean finishedAllInstances = false;
+		long unfinishedCount = 0;
 		long finishedCount = 0;
 		while (finishedAllInstances == false) {
-			finishedCount = processEngine.getHistoryService()
+			unfinishedCount = processEngine.getHistoryService()
 			    .createHistoricProcessInstanceQuery().unfinished().count();
-			logger.error(finishedCount + " unfinished jobs");
-			Thread.sleep(5000L);
+			finishedCount = processEngine.getHistoryService()
+			    .createHistoricProcessInstanceQuery().finished().count();
+			
+			finishedAllInstances = finishedCount == nrOfJobs;
+			
+			if (!finishedAllInstances) {
+				System.out.println(new Date() + " [Job Creator] " + finishedCount + " finished process instances in db, " + unfinishedCount + " unfinished process instances in db.");
+				Thread.sleep(10000L);
+			}
 		}
 	}
-	
-	private static void executeJobs(int nrOfJobs) throws Exception {
+
+	private static void startExecuteJobs(int nrOfJobs) throws Exception {
 		
-		processEngine = ProcessEngineConfiguration
-		    .createProcessEngineConfigurationFromResource("activiti_with_jobexecutor.cfg.xml")
-		    .buildProcessEngine();
+		System.out.println(new Date() +  " [Job Executor] Starting. Need to execute " + nrOfJobs + " jobs in total.");
+		
+		createJobExecutorProcessEngine(false, false);
 		
 		boolean finishedAllInstances = false;
 		long lastPrintTime = 0;
@@ -88,7 +99,8 @@ public class Main {
 			} else {
 				if (System.currentTimeMillis() - lastPrintTime > 5000L) {
 					lastPrintTime = System.currentTimeMillis();
-					logger.error("Executed " + finishedCount + " jobs");
+					int percentage = (int) (((double) finishedCount / (double) nrOfJobs) * 100.0);
+					System.out.println(new Date() +  " [Job Executor] Executed " + finishedCount + "/" + nrOfJobs + " jobs (" + percentage + "%)");
 				}
 				Thread.sleep(50);
 			}
@@ -98,6 +110,8 @@ public class Main {
 		long end = System.currentTimeMillis();
 
 		Assert.assertEquals(0, processEngine.getManagementService().createJobQuery().count());
+		System.out.println();
+		System.out.println();
 		System.out.println("Jobs in system (should be 0)= "+ processEngine.getManagementService().createJobQuery().count());
 		System.out.println("Jobs executed by this node: " + SleepDelegate.nrOfExecutions.get());
 		
@@ -105,9 +119,68 @@ public class Main {
 		System.out.println("Took " + time + " ms");
 		double perSecond = ((double) SleepDelegate.nrOfExecutions.get() / (double) time) * 1000;
 		System.out.println("Which is " + perSecond + " jobs/second");
+		System.out.println();
+		System.out.println();
 	}
 
-	public static class StartThread implements Runnable {
+	private static void startMixed(final int nrOfJobs, final int nrOfThreads) throws Exception {
+		createJobExecutorProcessEngine(true, true);
+		
+		// Create Jobs
+		Thread createJobsThread = new Thread(new Runnable() {
+			public void run() {
+				try {
+	        startCreateJobs(nrOfJobs, nrOfThreads);
+        } catch (Exception e) {
+	        e.printStackTrace();
+	        System.exit(-1);
+        }
+			}
+		});
+		createJobsThread.start();
+		
+		// Execute jobs
+		Thread executeJobsThread = new Thread(new Runnable() {
+			
+			public void run() {
+				try {
+	        startExecuteJobs(nrOfJobs);
+        } catch (Exception e) {
+	        e.printStackTrace();
+	        System.exit(-1);
+        }
+			}
+		});
+		executeJobsThread.start();
+		
+		createJobsThread.join();
+		executeJobsThread.join();
+		
+		System.out.println("Done.");
+		System.exit(0);
+	}
+	
+	private static void createJobCreatorProcessEngine(boolean replaceExisting) {
+		if (processEngine == null || replaceExisting) {
+		  processEngine = ProcessEngineConfiguration
+			    .createProcessEngineConfigurationFromResource("activiti_job_creator.cfg.xml")
+			    .setDatabaseSchemaUpdate("drop-create")
+			    .buildProcessEngine();
+		} 
+  }
+	
+	private static void createJobExecutorProcessEngine(boolean replaceExisting, boolean isDropDatabaseSchema) {
+		if (processEngine == null || replaceExisting) {
+			 ProcessEngineConfiguration processEngineConfiguration = ProcessEngineConfiguration
+					 .createProcessEngineConfigurationFromResource("activiti_with_jobexecutor.cfg.xml");
+			 if (isDropDatabaseSchema) {
+				 processEngineConfiguration.setDatabaseSchemaUpdate("drop-create");
+			 }
+		   processEngine = processEngineConfiguration.buildProcessEngine();
+		}
+  }
+
+	public static class StartTestProcessInstanceThread implements Runnable {
 		
 		public void run() {
 			processEngine.getRuntimeService().startProcessInstanceByKey("job");

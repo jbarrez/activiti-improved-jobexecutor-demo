@@ -12,7 +12,7 @@
 		<java.version>1.7</java.version>
 
 		<!-- Libraries versions -->
-		<activiti.version>5.16.4-SNAPSHOT</activiti.version>
+		<activiti.version>5.17.0-SNAPSHOT</activiti.version>
 
 	</properties>
 
