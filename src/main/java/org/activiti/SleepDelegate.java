@@ -1,6 +1,7 @@
 package org.activiti;
 
 
+import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.activiti.engine.delegate.DelegateExecution;
@@ -18,9 +19,10 @@ public class SleepDelegate implements JavaDelegate {
   	long var = 0;
   	while (System.currentTimeMillis() - startTime < 200) {
   		var += startTime; // Doing something to keep the JVM busy
-  		Thread.sleep(10L); // Doing some sleeps to mimic I/O
+  		Thread.sleep(50L); // Doing some sleeps to mimic I/O
   	}
   	nrOfExecutions.incrementAndGet();
+//  	System.out.println(new Date() + "Job Done!");
   }
 
   public void setSleepTime(Expression sleepTime) {

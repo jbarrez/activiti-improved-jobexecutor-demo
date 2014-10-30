@@ -4,6 +4,7 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans   http://www.springframework.org/schema/beans/spring-beans.xsd">
 
+	<!-- Tomcat connection pooling -->
 	<bean id="dataSource" class="org.apache.tomcat.jdbc.pool.DataSource"
 		destroy-method="close">
 		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
@@ -32,18 +33,36 @@
 		</property>
 
 		<!-- job executor configurations -->
-		<property name="jobExecutorActivate" value="true" />
-		<property name="jobExecutor" ref="myJobExecutor" />
+		<property name="jobExecutorActivate" value="false" />
+		<!-- <property name="jobExecutor" ref="myJobExecutor" /> -->
+		
+		<!-- <property name="asyncExecutor" ref="defaultAsyncExecutor" /> -->
+		<property name="asyncExecutor" ref="hazelCastAsyncExecutor" /> 
+		<property name="asyncExecutorActivate" value="true" />
+		
 
 	</bean>
+	
+	<!-- Default Async Executor -->
+	<!-- <bean id="defaultAsyncExecutor" class="org.activiti.engine.impl.asyncexecutor.DefaultAsyncJobExecutor">
+		<property name="queueSize" value="1024" />
+		<property name="corePoolSize" value="25" />
+		<property name="maxPoolSize" value="500" />
+		<property name="keepAliveTime" value="180000" />
+	</bean> -->
+	
+ 	<bean id="hazelCastAsyncExecutor" class="org.activiti.HazelCastAsyncExecutor">
+	</bean>
+	
 
-	<bean id="myJobExecutor" class="org.activiti.engine.impl.jobexecutor.LockFreeJobExecutor">
+	<!-- Lock Free job executor -->
+<!-- 	<bean id="myJobExecutor" class="org.activiti.engine.impl.jobexecutor.LockFreeJobExecutor">
 		<property name="queueSize" value="100" />
 		<property name="corePoolSize" value="10" />
 		<property name="maxPoolSize" value="500" />
 		<property name="keepAliveTime" value="5000" />
 		<property name="jobFetchBatchSize" value="200" />
 		<property name="waitTimeInMillis" value="30" />
-	</bean>
+	</bean> -->
 
 </beans>
