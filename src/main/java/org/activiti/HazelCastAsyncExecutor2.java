@@ -106,6 +106,11 @@ public class HazelCastAsyncExecutor2 implements AsyncExecutor {
   public boolean isActive() {
 		return isActive;
   }
+	
+	@Override
+	public CommandExecutor getCommandExecutor() {
+		return commandExecutor;
+	}
 
 
 	@Override
