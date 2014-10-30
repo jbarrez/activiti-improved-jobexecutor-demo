@@ -8,7 +8,7 @@
     </group>
     
     <network>
-        <port auto-increment="true" port-count="100">5701</port>
+        <port auto-increment="true" port-count="100">57001</port>
         <outbound-ports>
             <!--
             Allowed port range when connecting to other nodes.
@@ -21,6 +21,10 @@
                 <multicast-group>224.2.2.3</multicast-group>
                 <multicast-port>54327</multicast-port>
             </multicast>
+             <tcp-ip enabled="false">
+                <interface>192.168.0.184</interface>
+                <interface>192.168.0.198</interface>
+            </tcp-ip>
         </join>
     </network>
     
@@ -31,6 +35,30 @@
         <!--Queue capacity. 0 means Integer.MAX_VALUE.-->
         <queue-capacity>1024</queue-capacity>
     </executor-service>
+    
+     <queue name="activiti">
+        <!--
+            Maximum size of the queue. When a JVM's local queue size reaches the maximum,
+            all put/offer operations will get blocked until the queue size
+            of the JVM goes down below the maximum.
+            Any integer between 0 and Integer.MAX_VALUE. 0 means
+            Integer.MAX_VALUE. Default is 0.
+        -->
+        <max-size>1024</max-size>
+        <!--
+            Number of backups. If 1 is set as the backup-count for example,
+            then all entries of the map will be copied to another JVM for
+            fail-safety. 0 means no backup.
+        -->
+        <backup-count>1</backup-count>
+
+        <!--
+            Number of async backups. 0 means no backup.
+        -->
+        <async-backup-count>0</async-backup-count>
+
+        <empty-queue-ttl>-1</empty-queue-ttl>
+    </queue>
 
 
 </hazelcast>

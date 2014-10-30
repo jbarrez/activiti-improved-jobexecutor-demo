@@ -1,7 +1,5 @@
 package org.activiti;
 
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -65,8 +63,6 @@ public class HazelCastAsyncExecutor implements AsyncExecutor {
 	  isActive = false;
   }
 	
-	private static AtomicInteger count = new AtomicInteger(0);
-
 	@Override
   public void executeAsyncJob(JobEntity job) {
 		try {

@@ -51,7 +51,10 @@
 		<property name="keepAliveTime" value="180000" />
 	</bean> -->
 	
- 	<bean id="hazelCastAsyncExecutor" class="org.activiti.HazelCastAsyncExecutor">
+ 	<!-- <bean id="hazelCastAsyncExecutor" class="org.activiti.HazelCastAsyncExecutor">
+	</bean> -->
+	
+	<bean id="hazelCastAsyncExecutor" class="org.activiti.HazelCastAsyncExecutor2">
 	</bean>
 	
 
