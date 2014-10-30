@@ -8,7 +8,7 @@
     </group>
     
     <network>
-        <port auto-increment="true" port-count="100">57001</port>
+        <port auto-increment="false" port-count="100">57001</port>
         <outbound-ports>
             <!--
             Allowed port range when connecting to other nodes.
@@ -24,6 +24,7 @@
              <tcp-ip enabled="true">
                 <interface>192.168.0.184</interface>
                 <interface>192.168.0.198</interface>
+                <interface>192.168.0.171</interface>
             </tcp-ip>
         </join>
     </network>
