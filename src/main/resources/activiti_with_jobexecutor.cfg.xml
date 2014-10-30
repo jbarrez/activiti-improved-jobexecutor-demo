@@ -38,8 +38,8 @@
 		
 		<!-- <property name="asyncExecutor" ref="defaultAsyncExecutor" /> -->
 		<property name="asyncExecutor" ref="hazelCastAsyncExecutor" /> 
+		<property name="asyncExecutorEnabled" value="true" />
 		<property name="asyncExecutorActivate" value="true" />
-		
 
 	</bean>
 	
