@@ -108,13 +108,10 @@ public class Main {
 			}
 		}
 
-		Assert.assertEquals(nrOfJobs, finishedCount);
 		long end = System.currentTimeMillis();
 
-		Assert.assertEquals(0, processEngine.getManagementService().createJobQuery().count());
 		System.out.println();
 		System.out.println();
-		System.out.println("Jobs in system (should be 0)= "+ processEngine.getManagementService().createJobQuery().count());
 		System.out.println("Jobs executed by this node: " + SleepDelegate.nrOfExecutions.get());
 		
 		long time = end - start;

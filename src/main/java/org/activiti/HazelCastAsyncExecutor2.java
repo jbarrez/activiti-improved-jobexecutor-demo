@@ -80,8 +80,6 @@ public class HazelCastAsyncExecutor2 implements AsyncExecutor {
 
 	@Override
   public void shutdown() {
-		jobQueue.destroy();
-		
 		LocalQueueStats localQueueStats = jobQueue.getLocalQueueStats();
 		logger.info("This async job executor has processed " + localQueueStats.getPollOperationCount());
 
